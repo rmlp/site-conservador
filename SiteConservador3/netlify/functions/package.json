@@ -1,0 +1,14 @@
+{
+  "name": "netlify-functions",
+  "version": "1.0.0",
+  "description": "Funções serverless para o projeto Pensamento Conservador",
+  "main": "getAiResponse.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.1.3"
+  }
+}
