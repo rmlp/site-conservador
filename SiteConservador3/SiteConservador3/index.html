@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pensamento Conservador</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configuração para adicionar as novas fontes ao Tailwind
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Lora', 'serif'],
+                        'serif': ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- React Libraries -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel to transpile JSX in the browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Vanilla Tilt for 3D Hover Effect -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.7.2/dist/vanilla-tilt.min.js"></script>
+    <style>
+        /* Estilos para a transição suave da secção de obras */
+        .works-section {
+            transition: opacity 0.3s ease-in-out, max-height 0.4s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .works-section.visible {
+            max-height: 200px; /* Altura suficiente para as obras */
+            opacity: 1;
+        }
+        
+        /* Estilos para a animação da Splash Page */
+        .splash-enter {
+            opacity: 0;
+        }
+        .splash-enter-active {
+            opacity: 1;
+            transition: opacity 500ms;
+        }
+        .splash-exit {
+            opacity: 1;
+        }
+        .splash-exit-active {
+            opacity: 0;
+            transition: opacity 500ms;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 font-sans">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- Início do Código React ---
+
+        const { useState, useEffect, useRef } = React;
+
+        // --- ÍCONES SVG PARA O MENU ---
+        const ConceptIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2"><path d="M12 2.5a5.5 5.5 0 0 0-5.5 5.5c0 2.23 1.25 4.16 3 5.08V15.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-2.42c1.75-.92 3-2.85 3-5.08A5.5 5.5 0 0 0 12 2.5z"></path><path d="M12 15.5V18.5"></path><path d="M8.5 18.5h7"></path></svg>;
+        const PrinciplesIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2"><path d="m12 3-1.41 1.41L16.17 10H4v4h12.17l-5.58 5.59L12 21l8-8-8-8z"></path></svg>;
+        const TimelineIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
+        const QuizIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path><path d="M13.4 10.6 12 12l-1.4-1.4"></path><path d="M10.6 13.4 12 12l1.4 1.4"></path><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="m2 12h2"></path><path d="m20 12h2"></path><path d="m4.93 19.07 1.41-1.41"></path><path d="m17.66 6.34 1.41-1.41"></path></svg>;
+        const ArticleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4"></path><path d="M16 2v20"></path><path d="M11 7h-1"></path><path d="M11 12h-1"></path><path d="M11 17h-1"></path></svg>;
+        const AuthorIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
+        const SparkleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 mr-2"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2z"/></svg>;
+        const DeceasedIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 ml-2 text-slate-400 inline-block"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
+        const ShareIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>;
+        const RestartIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>;
+        const PolicyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>;
+
+
+        // --- ÍCONES PARA OS CARDS ---
+        const OrderIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M20 12h-8"></path><path d="M17 3l-5 5-5-5"></path><path d="M17 21l-5-5-5 5"></path><path d="M4 12H2"></path><path d="M22 12h-2"></path></svg>;
+        const PrudenceIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>;
+        const BrazilIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>;
+        const CaseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>;
+        const VarietyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>;
+        const ImperfectNatureIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>;
+        const LibertyPropertyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>;
+        const CommunityIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>;
+        const LimitedPowerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>;
+        const PrescriptionIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>;
+        const BalanceIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l-6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>;
+        const FreeMarketIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>;
+        const BookListIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2 text-slate-500"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>;
+
+
+        // --- DADOS MOCKADOS ---
+        const timelineData = [
+            { id: 1, year: "1790", title: "Edmund Burke", subtitle: "Reflexões sobre a Revolução na França", description: "Considerado o marco fundador do conservadorismo moderno, Burke critica os excessos da Revolução Francesa e defende a importância das instituições, tradições e mudanças graduais.", category: "Pensador", context: "No auge do Iluminismo e da Revolução Francesa, Burke ofereceu uma crítica contundente ao racionalismo abstrato, argumentando que a sabedoria acumulada das gerações é um guia mais seguro para a política do que as teorias radicais.", lifespan: "1729–1797" },
+            { id: 2, year: "1944", title: "Friedrich Hayek", subtitle: "O Caminho da Servidão", description: "Hayek argumenta que o planejamento central da economia inevitavelmente leva à tirania, defendendo o liberalismo clássico, o livre mercado e o estado de direito como pilares da liberdade individual.", category: "Pensador", context: "Escrito durante a Segunda Guerra Mundial, o livro de Hayek foi um alerta contra o avanço do socialismo e do planejamento estatal, influenciando decisivamente o renascimento do pensamento liberal-conservador no pós-guerra.", lifespan: "1899–1992" },
+            { id: 3, year: "1949", title: "Russell Kirk", subtitle: "A Mentalidade Conservadora", description: "Kirk delineou os seis cânones do pensamento conservador, enfatizando a crença em uma ordem transcendente, a desconfiança em 'sofistas e calculistas' e a afeição pela variedade da existência humana.", category: "Pensador", context: "Num período de expansão do liberalismo progressista nos EUA, a obra de Kirk resgatou e sistematizou a tradição conservadora anglo-americana, dando-lhe uma base intelectual coesa e influente para as décadas seguintes.", lifespan: "1918–1994" },
+            { id: 4, year: "1962", title: "Michael Oakeshott", subtitle: "Conservadorismo como Disposição", description: "Oakeshott descreve o conservadorismo não como uma ideologia, mas como uma disposição para preferir o familiar ao desconhecido, o experimentado ao não tentado, e a valorizar o presente.", category: "Conceito", context: "Em meio à agitação política e social dos anos 60, Oakeshott propôs uma visão do conservadorismo como uma atitude cética em relação a grandes projetos de engenharia social, valorizando a prática e o conhecimento tácito em detrimento da teoria abstrata.", lifespan: "1901–1990" },
+            { id: 5, year: "1980", title: "Roger Scruton", subtitle: "O Significado do Conservadorismo", description: "Scruton revitalizou o conservadorismo filosófico, argumentando que a lealdade às tradições e à 'nação' é fundamental para a coesão social e a liberdade individual.", category: "Pensador", context: "Numa era dominada pelo Thatcherismo e pelo foco na economia, Scruton reorientou o debate conservador para a importância da cultura, da estética e dos laços comunitários como alicerces de uma sociedade livre.", lifespan: "1944–2020" },
+            { id: 6, year: "1987", title: "Thomas Sowell", subtitle: "Conflito de Visões", description: "Sowell, um dos mais influentes intelectuais libertários, analisa como visões opostas sobre a natureza humana (restrita vs. irrestrita) moldam o debate político, econômico e social.", category: "Pensador", context: "Durante a Guerra Fria tardia, Sowell ofereceu uma poderosa ferramenta analítica para entender as divergências ideológicas, argumentando que as nossas premissas sobre a natureza humana determinam as nossas conclusões políticas.", lifespan: "n. 1930" },
+            { id: 7, year: "2013", title: "Olavo de Carvalho", subtitle: "O Mínimo que Você Precisa Saber...", description: "Filósofo de enorme e controversa influência no Brasil, sua obra popularizou o debate sobre o conservadorismo e a crítica à hegemonia cultural para uma nova geração de leitores.", category: "Pensador", context: "Num período de hegemonia do pensamento de esquerda no Brasil, a coletânea de artigos de Olavo de Carvalho tornou-se um fenômeno editorial, catalisando o ressurgimento do movimento conservador no país e influenciando profundamente o debate público.", lifespan: "1947–2022" },
+        ];
+
+        const principlesData = [
+            { id: 1, title: "Ordem Moral", icon: OrderIcon, tags: ["Lei Natural", "Valores Universais", "Ética Objetiva"], description: "Existe uma 'bússola moral' universal sobre o certo e o errado que guia a sociedade e transcende as leis escritas.", analogy: "O 'código de honra' não escrito da sua família, baseado em honestidade e respeito.", myth: "\"Isso é só uma forma de impor a religião e valores ultrapassados a todos.\"", truth: "Não se trata de impor uma religião, mas de reconhecer que valores como coragem, justiça e honestidade são a base para qualquer sociedade funcionar." },
+            { id: 2, title: "Tradição", icon: TimelineIcon, tags: ["Instituições Históricas", "Costumes Locais", "Sabedoria Ancestral"], description: "Valorizar a sabedoria acumulada por gerações. Costumes e instituições que duram têm um motivo: eles funcionam.", analogy: "A receita de bolo da sua avó. Você confia nela porque foi testada e aprovada por décadas.", myth: "\"É ser contra o progresso e querer viver no passado.\"", truth: "É o contrário. A tradição é a base sólida sobre a qual o verdadeiro progresso é construído." },
+            { id: 3, title: "Prudência", icon: PrudenceIcon, tags: ["Reformas Graduais", "Análise Cuidadosa", "Experiência Prática"], description: "Agir com cautela ao propor grandes mudanças, pensando nas consequências para evitar reformas apressadas.", analogy: "A regra \"meça duas vezes, corte uma\". Antes de derrubar uma parede, você verifica se ela sustenta o teto.", myth: "\"É uma desculpa para não fazer nada e manter privilégios.\"", truth: "Prudência não é paralisia. É responsabilidade." },
+            { id: 4, title: "Variedade", icon: VarietyIcon, tags: ["Diversidade Natural", "Mérito Individual", "Hierarquias Orgânicas"], description: "A sociedade é naturalmente diversa. Tentar forçar uma igualdade absoluta acaba com a riqueza da vida social.", analogy: "Um jardim saudável é cheio de plantas diferentes. A força está na sua variedade.", myth: "\"Vocês são contra a igualdade e defendem a desigualdade social.\"", truth: "Defende-se a igualdade perante a lei, não uma igualdade forçada de resultados." },
+            { id: 5, title: "Natureza Imperfeita", icon: ImperfectNatureIcon, tags: ["Realismo", "Ceticismo", "Limites Humanos"], description: "Reconhecer que o ser humano não é perfeito. Projetos de \"paraíso na Terra\" são perigosos e fadados ao fracasso.", analogy: "Nenhuma família é perfeita. O objetivo não é ser ideal, mas ter regras e amor para lidar com os problemas.", myth: "\"É uma visão pessimista que impede de sonhar com um mundo melhor.\"", truth: "É uma visão realista que nos leva a criar sistemas que nos protegem de nossos piores impulsos." },
+            { id: 6, title: "Liberdade e Propriedade", icon: LibertyPropertyIcon, tags: ["Direitos de Propriedade", "Iniciativa Privada", "Independência"], description: "A liberdade individual e a propriedade privada estão conectadas. Ter algo seu garante independência.", analogy: "A posse de sua casa ou de suas ferramentas de trabalho garante um domínio sobre a própria vida, independente do Estado ou de patrões.", myth: "\"É a defesa do egoísmo e da acumulação de riqueza para poucos.\"", truth: "A propriedade é a principal defesa do cidadão comum contra um Estado poderoso." },
+            { id: 7, title: "Comunidade", icon: CommunityIcon, tags: ["Governo Local", "Associações Voluntárias", "Descentralização"], description: "Problemas devem ser resolvidos no nível mais local possível. Comunidades fortes são mais eficazes que um governo distante.", analogy: "Se um buraco abre na sua rua, o mais rápido é juntar os vizinhos para cobrar da prefeitura local.", myth: "\"Isso é ser contra o Estado e os programas sociais.\"", truth: "É ser a favor de um Estado que não sufoque a iniciativa da sociedade civil. Famílias e vizinhos resolvem problemas com mais agilidade." },
+            { id: 8, title: "Limitação do Poder", icon: LimitedPowerIcon, tags: ["Constituição", "Estado de Direito", "Freios e Contrapesos"], description: "Desconfiar do poder concentrado. Um governo com poder demais é um perigo para a liberdade dos cidadãos.", analogy: "As regras de um jogo, que impedem um jogador de trapacear. A Constituição é a regra do jogo da democracia.", myth: "\"É querer um 'Estado mínimo' que não ajuda ninguém.\"", truth: "É querer um Estado forte em suas funções essenciais (segurança, justiça) e limitado em sua capacidade de interferir na vida das pessoas." },
+            { id: 9, title: "Prescrição", icon: PrescriptionIcon, tags: ["Legitimidade Histórica", "Direito Consuetudinário", "Herança"], description: "Direitos e instituições que existem há muito tempo ganham legitimidade por terem sido testados e aprovados pela história.", analogy: "A praça antiga da sua cidade. Seu direito de existir é \"prescrito\" pelo tempo e pela sua importância para a comunidade.", myth: "\"É apenas uma forma de justificar práticas e leis antigas e opressoras.\"", truth: "Não se trata de aceitar tudo o que é antigo, mas de dar preferência ao que foi testado pelo tempo em vez de apostar em teorias abstratas." },
+            { id: 10, title: "Equilíbrio", icon: BalanceIcon, tags: ["Permanência e Mudança", "Moderação", "Reforma vs. Revolução"], description: "Entender que uma sociedade saudável precisa equilibrar permanência e mudança. Mudanças devem ser graduais.", analogy: "Reformar uma casa histórica: você moderniza a fiação (mudança), mas preserva a arquitetura (permanência).", myth: "\"É ser 'em cima do muro'.\"", truth: "É ter a sabedoria de um reformador, não a fúria de um demolidor. A sociedade precisa de raízes fortes para poder crescer." },
+            { id: 11, title: "Livre Mercado", icon: FreeMarketIcon, tags: ["Capitalismo", "Competição", "Inovação"], description: "A economia funciona melhor quando as trocas são voluntárias, com mínima interferência do governo, incentivando a competição e a inovação.", analogy: "A liberdade de escolher onde comprar seu pão, o que incentiva a padaria a oferecer o melhor produto pelo melhor preço.", myth: "\"É a lei do mais forte, que só beneficia os ricos e não se importa com os pobres.\"", truth: "O livre mercado é o sistema que mais gerou riqueza e tirou pessoas da pobreza na história. Ele recompensa a inovação e o serviço ao próximo, beneficiando a todos." }
+        ];
+
+        const quizQuestions = [
+            {
+                question: "Uma política que valoriza a sabedoria de gerações passadas ao invés de adotar reformas radicais e não testadas representa qual princípio?",
+                answers: [
+                    { text: "Livre Mercado", isCorrect: false },
+                    { text: "Tradição", isCorrect: true },
+                    { text: "Variedade", isCorrect: false },
+                    { text: "Comunidade", isCorrect: false },
+                ],
+                explanation: "A Tradição é o princípio que valoriza a sabedoria acumulada, preferindo instituições e costumes que foram testados pelo tempo a inovações abruptas."
+            },
+            {
+                question: "A crença de que mudanças sociais devem ser graduais e cuidadosas, evitando a disrupção abrupta da sociedade, é um exemplo de:",
+                answers: [
+                    { text: "Prudência", isCorrect: true },
+                    { text: "Ordem Moral", isCorrect: false },
+                    { text: "Liberdade e Propriedade", isCorrect: false },
+                    { text: "Natureza Imperfeita", isCorrect: false },
+                ],
+                explanation: "A Prudência é a virtude de agir com cautela e considerar as consequências a longo prazo, sendo um pilar do conservadorismo contra reformas apressadas."
+            },
+            {
+                question: "Quando se defende que a família e as associações locais são mais eficazes para resolver problemas sociais do que um governo centralizado, qual princípio está em jogo?",
+                answers: [
+                    { text: "Equilíbrio", isCorrect: false },
+                    { text: "Prescrição", isCorrect: false },
+                    { text: "Comunidade", isCorrect: true },
+                    { text: "Limitação do Poder", isCorrect: false },
+                ],
+                explanation: "O princípio da Comunidade (ou subsidiariedade) defende que os problemas devem ser resolvidos pela menor e mais local autoridade capaz de o fazer eficazmente."
+            },
+            {
+                question: "A desconfiança em projetos de engenharia social que prometem criar uma 'sociedade perfeita' baseia-se no princípio da:",
+                answers: [
+                    { text: "Natureza Imperfeita", isCorrect: true },
+                    { text: "Livre Mercado", isCorrect: false },
+                    { text: "Tradição", isCorrect: false },
+                    { text: "Variedade", isCorrect: false },
+                ],
+                explanation: "O reconhecimento da Natureza Imperfeita do ser humano leva os conservadores a serem céticos em relação a utopias, pois entendem que a perfeição não é alcançável."
+            },
+            {
+                question: "A defesa de que a Constituição deve restringir a ação do Estado para proteger os cidadãos é um exemplo claro de:",
+                answers: [
+                    { text: "Ordem Moral", isCorrect: false },
+                    { text: "Limitação do Poder", isCorrect: true },
+                    { text: "Prudência", isCorrect: false },
+                    { text: "Comunidade", isCorrect: false },
+                ],
+                explanation: "A Limitação do Poder é fundamental para o conservadorismo, que vê a concentração de poder como uma ameaça à liberdade individual e à estabilidade social."
+            },
+            {
+                question: "Quem é considerado o 'Pai do Conservadorismo Moderno'?",
+                answers: [
+                    { text: "John Locke", isCorrect: false },
+                    { text: "Edmund Burke", isCorrect: true },
+                    { text: "Adam Smith", isCorrect: false },
+                    { text: "David Hume", isCorrect: false },
+                ],
+                explanation: "Edmund Burke é amplamente reconhecido como o fundador do conservadorismo moderno através de suas críticas à Revolução Francesa em 'Reflexões sobre a Revolução na França'."
+            },
+            {
+                question: "Qual evento histórico é considerado o catalisador do conservadorismo moderno?",
+                answers: [
+                    { text: "Revolução Industrial", isCorrect: false },
+                    { text: "Revolução Americana", isCorrect: false },
+                    { text: "Revolução Francesa", isCorrect: true },
+                    { text: "Guerra Civil Inglesa", isCorrect: false },
+                ],
+                explanation: "A Revolução Francesa e a sua abordagem radical de 'engenharia social' foram o principal catalisador que levou Edmund Burke a formular os princípios do conservadorismo moderno como uma resposta."
+            }
+        ];
+
+        const articlesData = [
+            {
+                id: 1,
+                title: "A Prudência de Michael Oakeshott",
+                category: "Gigantes do Pensamento",
+                quote: "Ser conservador é preferir o familiar ao desconhecido, o experimentado ao não tentado...",
+                tags: ["Prudência", "Racionalismo", "Tradição"],
+                readTime: "5 min",
+                content: `
+                    <p class="mb-4 text-justify">Michael Oakeshott (1901-1990) é um dos mais sofisticados pensadores do conservadorismo do século XX. Para ele, o conservadorismo não é uma ideologia ou um conjunto de doutrinas, mas sim uma "disposição". É a preferência pelo familiar em detrimento do desconhecido, pelo experimentado em detrimento do não testado. Esta não é uma aversão à mudança, mas uma profunda desconfiança em relação à mudança motivada por ideais abstratos e pela promessa de utopias.</p>
+                    <p class="mb-4 text-justify">A sua crítica central era direcionada ao que ele chamava de "racionalismo na política". O racionalista, segundo Oakeshott, acredita que a política é uma forma de "engenharia social", onde a razão pode desenhar uma sociedade perfeita a partir do zero, ignorando as complexas tradições, os costumes e o conhecimento tácito que compõem a vida real de uma comunidade. Para o conservador oakeshottiano, a política é mais parecida com a jardinagem do que com a engenharia: requer paciência, conhecimento das condições locais e um respeito pelo crescimento orgânico das instituições.</p>
+                    <p class="mb-4 text-justify">Em tempos de polarização e de propostas radicais de transformação social, a prudência de Oakeshott serve como um lembrete valioso. Ele ensina que a política deve ser uma conversa, não uma guerra de ideologias. O objetivo não é alcançar um paraíso terrestre, mas sim manter o "navio da comunidade a flutuar em águas calmas", navegando com cuidado entre a necessidade de estabilidade e a inevitabilidade da mudança.</p>
+                `
+            },
+            {
+                id: 2,
+                title: "As Lições de 'O Caminho da Servidão'",
+                category: "Análise de Obras",
+                quote: "A liberdade concedida apenas quando se sabe de antemão que os seus efeitos serão benéficos não é liberdade.",
+                tags: ["Liberdade", "Economia", "Estado"],
+                readTime: "4 min",
+                content: `
+                    <p class="mb-4 text-justify">Publicado em 1944, "O Caminho da Servidão" de Friedrich Hayek não é apenas um livro de economia; é uma apaixonada defesa da liberdade individual contra a tirania do planeamento central. Escrito enquanto o mundo lutava contra o totalitarismo nazi e via com simpatia o modelo socialista soviético, Hayek fez um alerta corajoso: qualquer forma de coletivismo, seja de direita ou de esquerda, que coloque o Estado no controlo total da economia, inevitavelmente destrói a liberdade.</p>
+                    <p class="mb-4 text-justify">O argumento central de Hayek é que a complexidade da economia torna impossível que um único órgão de planeamento tome decisões melhores do que os milhões de indivíduos que participam no mercado. O sistema de preços, para Hayek, é um mecanismo de comunicação insubstituível, que transmite informação sobre a escassez e a preferência de forma muito mais eficiente do que qualquer burocrata. Ao tentar substituir este sistema, o Estado não só se torna ineficiente, como precisa de acumular cada vez mais poder para impor os seus planos, esmagando a dissidência e, por fim, a liberdade política.</p>
+                    <p class="mb-4 text-justify">Hoje, num mundo onde novas propostas de intervenção estatal na economia surgem constantemente, as lições de Hayek são mais relevantes do que nunca. O livro é um lembrete de que a liberdade económica e a liberdade política não são separáveis. A defesa de uma sociedade livre exige uma vigilância constante contra a concentração de poder, por mais bem-intencionadas que as suas justificações possam parecer.</p>
+                `
+            },
+            {
+                id: 3,
+                title: "Roberto Campos e o Brasil",
+                category: "Conservadorismo no Brasil",
+                quote: "A burrice no Brasil tem um passado glorioso e um futuro promissor.",
+                tags: ["Liberalismo", "Brasil", "Economia"],
+                readTime: "5 min",
+                content: `
+                    <p class="mb-4 text-justify">Roberto de Oliveira Campos (1917-2001) é uma figura incontornável para se compreender a história do pensamento liberal-conservador no Brasil. Dotado de uma inteligência brilhante e de uma ironia mordaz, ele foi um dos mais ferozes críticos do nacionalismo estatizante que dominou a política brasileira durante grande parte do século XX. A sua defesa da abertura económica, da privatização e da responsabilidade fiscal valeu-lhe o epíteto de "Bob Fields" por parte dos seus detratores, mas a história provou que as suas análises estavam, em grande parte, corretas.</p>
+                    <p class="mb-4 text-justify">Como Ministro do Planeamento no governo Castello Branco, Campos foi um dos arquitetos de um importante programa de estabilização económica. No entanto, foi a sua carreira posterior, como senador e escritor, que solidificou o seu legado como um "cavaleiro solitário" na luta contra o que ele via como o atraso económico e intelectual do Brasil. Ele argumentava que o país sofria de uma "inflação de diagnósticos e uma deflação de terapias", onde a culpa pelos problemas era sempre atribuída a fatores externos, nunca aos erros da política interna.</p>
+                    <p class="mb-4 text-justify">Ler Roberto Campos hoje é um exercício de lucidez. As suas críticas à burocracia, ao corporativismo e à mentalidade anti-mercado continuam surpreendentemente atuais. Ele representa a vertente do conservadorismo que enfatiza a importância de instituições económicas sólidas, do estado de direito e da integração no mercado global como os verdadeiros caminhos para a prosperidade e para a liberdade.</p>
+                `
+            },
+            {
+                id: 4,
+                title: "Subsidiariedade na Prática",
+                category: "Conceitos-Chave",
+                quote: "Um poder superior não deve interferir na vida de um grupo menor se este consegue resolver os seus próprios problemas.",
+                tags: ["Comunidade", "Estado", "Família"],
+                readTime: "4 min",
+                content: `
+                    <p class="mb-4 text-justify">Subsidiariedade é um dos conceitos mais elegantes e menos compreendidos do pensamento social conservador. Originário da doutrina social católica, o princípio sustenta que as questões sociais devem ser resolvidas pela menor, mais local e menos centralizada autoridade capaz de o fazer. Em outras palavras, um poder superior não deve interferir na vida de um grupo menor se este consegue resolver os seus próprios problemas.</p>
+                    <p class="mb-4 text-justify">Na prática, isto significa uma valorização imensa das "associações voluntárias" que formam o tecido social: a família, a igreja, a vizinhança, os clubes e as organizações de caridade. Para um conservador, uma sociedade saudável não é aquela onde o Estado resolve tudo, mas aquela onde estas comunidades intermedias são fortes e autónomas. Elas são as primeiras a oferecer ajuda, a transmitir valores e a criar laços de confiança, algo que nenhum governo distante consegue replicar.</p>
+                    <p class="mb-4 text-justify">Longe de ser um argumento para a ausência do Estado, a subsidiariedade é um princípio de boa governança. O Estado tem funções essenciais, como a defesa e a justiça, mas deve agir como um suporte ("subsídium", em latim, significa ajuda), e não como um substituto para a responsabilidade individual e comunitária. É um princípio que defende uma sociedade de cidadãos ativos, e não de dependentes passivos.</p>
+                `
+            },
+            {
+                id: 5,
+                title: "A Queda do Muro de Berlim",
+                category: "Estudos de Caso",
+                quote: "O Muro de Berlim era o símbolo de uma ideologia que precisava de aprisionar as pessoas para que o seu 'paraíso' pudesse funcionar.",
+                tags: ["Guerra Fria", "Liberdade", "Totalitarismo"],
+                readTime: "5 min",
+                content: `
+                    <p class="mb-4 text-justify">A queda do Muro de Berlim em 1989 é frequentemente celebrada, com razão, como uma vitória da democracia liberal. No entanto, sob uma ótica conservadora, o evento representa algo ainda mais profundo: a falência retumbante da "política do racionalismo" criticada por Oakeshott e a reafirmação da importância das tradições e da natureza humana.</p>
+                    <p class="mb-4 text-justify">O comunismo soviético foi, talvez, o maior projeto de engenharia social da história. Ele procurou criar um "novo homem" e uma sociedade perfeita, apagando as tradições nacionais, a religião e a propriedade privada — os pilares de qualquer ordem social orgânica. O Muro de Berlim não era apenas uma barreira física; era o símbolo de uma ideologia que precisava de aprisionar as pessoas para que o seu "paraíso" pudesse funcionar. A sua queda não foi apenas o resultado de pressões geopolíticas, mas também da sede inextinguível do ser humano por liberdade, identidade e transcendência, valores que o regime tentou suprimir por décadas.</p>
+                    <p class="mb-4 text-justify">O evento serve como um poderoso estudo de caso para o princípio da prudência. Ele demonstra os perigos catastróficos de tentar redesenhar a sociedade com base em teorias abstratas, ignorando a sabedoria contida nas instituições que evoluíram ao longo de séculos. A reunificação da Alemanha e a libertação do Leste Europeu não foram o início de uma utopia, mas o retorno a uma normalidade imperfeita, baseada na soberania nacional e na liberdade individual — um resultado profundamente conservador.</p>
+                `
+            },
+            {
+                id: 6,
+                title: "Os Fatos Teimosos de Thomas Sowell",
+                category: "Política e Sociedade",
+                quote: "A primeira lição da economia é a escassez... A primeira lição da política é ignorar a primeira lição da economia.",
+                tags: ["Thomas Sowell", "Políticas Públicas", "Economia"],
+                readTime: "6 min",
+                content: `
+                    <p class="mb-4 text-justify">Thomas Sowell (n. 1930) é um dos mais prolíficos e incisivos intelectuais dos nossos tempos. A sua abordagem distingue-se por uma rigorosa análise empírica, focada em dados e fatos, para desconstruir narrativas políticas populares. Sowell argumenta que muitas políticas públicas, embora criadas com as melhores intenções, produzem resultados desastrosos porque ignoram os incentivos económicos e a complexidade da natureza humana.</p>
+                    <p class="mb-4 text-justify">No que diz respeito às políticas de cotas e ação afirmativa, Sowell é um crítico contundente. Através de estudos de caso internacionais, ele demonstra que estas políticas raramente beneficiam os membros mais desfavorecidos do grupo-alvo. Pelo contrário, tendem a beneficiar aqueles que já estavam numa trajetória ascendente, enquanto criam ressentimento e estigmatizam todos os membros do grupo, incluindo aqueles que teriam sucesso por mérito próprio.</p>
+                    <p class="mb-4 text-justify">A sua análise sobre desigualdade económica também desafia o senso comum. Sowell argumenta que as disparidades de rendimento entre diferentes grupos étnicos ou sociais não são, por si só, uma prova de discriminação. Ele aponta para uma miríade de outros fatores, como a idade média de cada grupo, a cultura, a geografia e os valores familiares, que têm um impacto muito maior nos resultados económicos. Para ele, procurar a "justiça social" através da redistribuição forçada de riqueza ignora as verdadeiras causas da prosperidade e pode levar à estagnação.</p>
+                    <p class="mb-4 text-justify">A lição central de Sowell, aprofundada em obras como "Os Intelectuais e a Sociedade", é um apelo à humildade intelectual: devemos julgar as políticas pelas suas consequências reais e mensuráveis, e não pelas suas intenções nobres ou pela retórica que as acompanha. É uma abordagem que valoriza a realidade acima da ideologia, um pilar do pensamento conservador.</p>
+                `
+            }
+        ];
+        
+        const authorsData = [
+            { 
+                id: 1, 
+                name: "Edmund Burke", 
+                lifespan: "1729–1797", 
+                quote: "A única coisa necessária para o triunfo do mal é que os homens de bem não façam nada.", 
+                summary: "Considerado o pai do conservadorismo moderno, Burke defendeu a importância da tradição, das instituições estabelecidas e da mudança gradual como uma resposta aos excessos da Revolução Francesa.",
+                works: [
+                    { title: "Reflexões sobre a Revolução na França", year: 1790 },
+                    { title: "Uma Investigação Filosófica sobre a Origem de Nossas Ideias do Sublime e do Belo", year: 1757 }
+                ]
+            },
+            { 
+                id: 2, 
+                name: "Russell Kirk", 
+                lifespan: "1918–1994", 
+                quote: "O conservador acredita que existe uma ordem moral duradoura.", 
+                summary: "Kirk foi fundamental para a revitalização do conservadorismo nos Estados Unidos no século XX. Ele sistematizou os princípios do pensamento conservador, enfatizando a ordem moral, a tradição e a prudência.",
+                works: [
+                    { title: "A Mentalidade Conservadora", year: 1953 },
+                    { title: "A Política da Prudência", year: 1993 }
+                ]
+            },
+            { 
+                id: 3, 
+                name: "Michael Oakeshott", 
+                lifespan: "1901–1990", 
+                quote: "Ser conservador é... preferir o familiar ao desconhecido, o experimentado ao não tentado.", 
+                summary: "Oakeshott descreveu o conservadorismo não como uma ideologia, mas como uma 'disposição'. A sua crítica ao 'racionalismo na política' alertou para os perigos de tentar redesenhar a sociedade com base em teorias abstratas.",
+                works: [
+                    { title: "Racionalismo na Política e Outros Ensaios", year: 1962 },
+                    { title: "Sobre a História e Outros Ensaios", year: 1983 }
+                ]
+            },
+            { 
+                id: 4, 
+                name: "Roger Scruton", 
+                lifespan: "1944–2020", 
+                quote: "O conservadorismo trata da preservação de uma ecologia social.", 
+                summary: "Um dos mais importantes filósofos conservadores contemporâneos, Scruton defendeu a importância da cultura, da estética e dos laços comunitários como fundamentos de uma sociedade livre e significativa.",
+                works: [
+                    { title: "Como ser um Conservador", year: 2014 },
+                    { title: "O Rosto de Deus", year: 2012 },
+                    { title: "O Significado do Conservadorismo", year: 1980 }
+                ]
+            },
+            { 
+                id: 5, 
+                name: "Friedrich Hayek", 
+                lifespan: "1899–1992", 
+                quote: "A curiosa tarefa da economia é demonstrar aos homens quão pouco eles realmente sabem sobre aquilo que imaginam que podem projetar.", 
+                summary: "Embora mais associado ao liberalismo clássico, Hayek é uma figura central para o liberal-conservadorismo. A sua obra 'O Caminho da Servidão' é uma poderosa crítica ao planeamento central e à concentração de poder estatal.",
+                works: [
+                    { title: "O Caminho da Servidão", year: 1944 },
+                    { title: "A Constituição da Liberdade", year: 1960 }
+                ]
+            },
+            { 
+                id: 6, 
+                name: "Thomas Sowell", 
+                lifespan: "n. 1930", 
+                quote: "Não há soluções, apenas concessões (trade-offs).", 
+                summary: "Sowell é conhecido pela sua análise económica rigorosa e pela sua crítica a políticas públicas baseadas em intenções e não em resultados. A sua obra enfatiza o realismo, a importância dos incentivos e a complexidade social.",
+                works: [
+                    { title: "Conflito de Visões", year: 1987 },
+                    { title: "Os Intelectuais e a Sociedade", year: 2009 }
+                ]
+            },
+            { 
+                id: 7, 
+                name: "Roberto Campos", 
+                lifespan: "1917–2001", 
+                quote: "O Brasil não corre o risco de dar certo.", 
+                summary: "Com uma ironia afiada, Roberto Campos foi um dos maiores defensores do liberalismo económico no Brasil. Ele combateu o nacionalismo, a burocracia e o estatismo, defendendo a abertura de mercado como caminho para a prosperidade.",
+                works: [
+                    { title: "A Lanterna na Popa", year: 1994 },
+                    { title: "O Século Esquisito", year: 1991 }
+                ]
+            },
+            {
+              id: 8,
+              name: "Olavo de Carvalho",
+              lifespan: "1947–2022",
+              quote: "A cultura é, no indivíduo, o resíduo de uma longa experiência de autotransformação consciente.",
+              summary: "Filósofo de enorme e controversa influência no Brasil, sua obra popularizou o debate sobre o conservadorismo e a crítica à hegemonia cultural para uma nova geração de leitores.",
+              works: [
+                { title: "O Mínimo que Você Precisa Saber para Não Ser um Idiota", year: 2013 },
+                { title: "O Imbecil Coletivo", year: 1996 },
+                { title: "O Jardim das Aflições", year: 1995 }
+              ]
+            },
+            {
+              id: 9,
+              name: "Jordan B. Peterson",
+              lifespan: "n. 1962",
+              quote: "Assuma que a pessoa com quem você está a conversar sabe algo que você não sabe.",
+              summary: "Psicólogo clínico e intelectual público, Peterson tornou-se uma figura proeminente por sua defesa da responsabilidade individual, da liberdade de expressão e pela sua crítica a ideologias que ele considera destrutivas. Embora não se enquadre estritamente como um filósofo conservador, as suas ideias sobre ordem, caos e o valor das estruturas tradicionais encontraram grande ressonância em círculos conservadores e liberais clássicos.",
+              works: [
+                { title: "12 Regras para a Vida: Um Antídoto para o Caos", year: 2018 },
+                { title: "Mapas do Significado: A Arquitetura da Crença", year: 1999 },
+                { title: "Para Além da Ordem: Mais 12 Regras para a Vida", year: 2021 }
+              ]
+            }
+        ];
+
+
+        const BookIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 mr-2 text-amber-800"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>;
+        const UserIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 mr-2 text-blue-800"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
+        const LightbulbIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 mr-2 text-yellow-800"><path d="M15.09 16.05A6.47 6.47 0 0 1 12 20a6.47 6.47 0 0 1-3.09-3.95"></path><path d="M12 2v8"></path><path d="M8.5 8.5 4.24 4.24"></path><path d="M15.5 8.5 19.76 4.24"></path><path d="M12 20a2.5 2.5 0 0 1 2.5-2.5V16a2.5 2.5 0 0 1-5 0v1.5A2.5 2.5 0 0 1 12 20z"></path></svg>;
+
+        // --- COMPONENTES DE PÁGINA E UI ---
+        
+        const SplashPage = ({ onStart }) => {
+            const imageUrl = 'images/capa.jpg';
+
+            return (
+                <div 
+                    className="h-screen w-screen bg-cover bg-center flex items-center justify-center text-white text-center p-8 splash-enter-active"
+                    style={{ 
+                        backgroundImage: `url(${imageUrl})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat'
+                    }}
+                >
+                    <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+                    <div className="relative z-10 max-w-3xl animate-fade-in" style={{ animation: 'fadeIn 1s ease-in-out' }}>
+                        <h1 className="text-5xl md:text-7xl font-serif mb-4" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }}>
+                            Pensamento Conservador
+                        </h1>
+                        <p className="text-md md:text-lg mb-10" style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.7)' }}>
+                            Explore a rica tradição do conservadorismo através da história, princípios e pensadores que moldaram nossa civilização.
+                        </p>
+                        <p className="text-lg md:text-xl mb-12 text-slate-300" style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.7)' }}>
+                            Uma jornada interativa pela sabedoria conservadora: da tradição à modernidade, dos princípios fundamentais às aplicações práticas na sociedade contemporânea.
+                        </p>
+                        <button 
+                            onClick={onStart}
+                            className="bg-white text-slate-800 font-bold text-lg px-8 py-3 rounded-md hover:bg-slate-200 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                        >
+                            Comece a Explorar
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const ConceptPage = ({ setCurrentPage }) => (
+            <div className="container mx-auto px-6 py-20">
+                <div className="grid md:grid-cols-2 gap-16 items-center">
+                    <div className="flex flex-col justify-center">
+                        <h1 className="text-5xl font-serif text-slate-800 mb-6 leading-tight">O que é o Conservadorismo?</h1>
+                        <p className="text-slate-600 mb-4 leading-relaxed">O conservadorismo é uma filosofia social que defende a preservação das instituições, costumes e valores sociais tradicionais. Não é uma ideologia rígida, mas sim um estado da mente, um tipo de caráter, uma maneira de olhar para a ordem social e civil.</p>
+                        <p className="text-slate-600 mb-8 leading-relaxed">Através deste site, você poderá explorar os princípios fundamentais, conhecer os grandes pensadores e compreender como essa corrente de pensamento influenciou a história e continua relevante nos dias atuais.</p>
+                        <button onClick={() => setCurrentPage('principios')} className="bg-slate-800 text-white font-semibold px-6 py-3 rounded-md self-start hover:bg-slate-700 transition-colors flex items-center">
+                            Conhecer os Princípios <span className="ml-2">&rarr;</span>
+                        </button>
+                    </div>
+                    <div className="space-y-6">
+                        <div className="bg-white p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-xl transition-shadow"><div className="flex items-center mb-3"><OrderIcon /><h3 className="ml-3 text-xl font-serif text-slate-800">Ordem Moral</h3></div><p className="text-slate-600">Crença em uma ordem moral duradoura que orienta a sociedade e o indivíduo.</p></div>
+                        <div className="bg-white p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-xl transition-shadow"><div className="flex items-center mb-3"><TimelineIcon /><h3 className="ml-3 text-xl font-serif text-slate-800">Tradição e Continuidade</h3></div><p className="text-slate-600">Valorização dos costumes e convenções que permitem a convivência pacífica.</p></div>
+                        <div className="bg-white p-6 rounded-lg shadow-md border border-slate-200 hover:shadow-xl transition-shadow"><div className="flex items-center mb-3"><PrudenceIcon /><h3 className="ml-3 text-xl font-serif text-slate-800">Prudência</h3></div><p className="text-slate-600">Mudanças graduais e refletidas, respeitando a sabedoria das gerações passadas.</p></div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const PrinciplesPage = ({ onPrincipleSelected, setCurrentPage }) => (
+            <div className="py-20">
+                <div className="container mx-auto text-center mb-16">
+                    <h2 className="text-4xl font-serif text-slate-900">Princípios Fundamentais</h2>
+                    <p className="text-lg text-slate-600 mt-2">Explore as ideias que formam a base do pensamento conservador.</p>
+                </div>
+                <div className="container mx-auto px-6 grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {principlesData.map((principle) => (
+                        <div key={principle.id} className="bg-white rounded-lg shadow-lg border border-slate-100 flex flex-col transition-all duration-300 p-6 transform hover:-translate-y-2 hover:shadow-2xl">
+                            <div className="flex items-center mb-4">
+                                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-slate-100 flex-shrink-0">
+                                   <principle.icon />
+                                </div>
+                                <h3 className="text-2xl font-serif text-slate-800 ml-4">{principle.title}</h3>
+                            </div>
+                            <p className="text-slate-600 text-sm leading-relaxed mt-2 flex-grow">{principle.description}</p>
+                            <div className="pt-4 mt-auto">
+                                <button 
+                                    onClick={() => onPrincipleSelected(principle)}
+                                    className="font-bold text-sm text-red-800 hover:text-red-600 transition-colors duration-300 mb-4"
+                                >
+                                    Ler mais &rarr;
+                                </button>
+                                <div className="border-t border-slate-100 pt-4 flex flex-wrap gap-2">
+                                    {principle.tags.map(tag => (
+                                        <span key={tag} className="bg-slate-100 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-full">{tag}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <div className="text-center mt-16">
+                    <button 
+                        onClick={() => setCurrentPage('timeline')} 
+                        className="bg-slate-800 text-white font-semibold px-6 py-3 rounded-md hover:bg-slate-700 transition-colors flex items-center mx-auto"
+                    >
+                        Ver a Linha do Tempo <span className="ml-2">&rarr;</span>
+                    </button>
+                </div>
+            </div>
+        );
+
+        const TimelinePage = ({ onItemSelected, setCurrentPage }) => {
+            const Timeline = () => {
+                const getIcon = (category) => {
+                    switch(category) {
+                        case 'Pensador': return <UserIcon />;
+                        case 'Obra': return <BookIcon />;
+                        case 'Conceito': return <LightbulbIcon />;
+                        default: return <UserIcon />;
+                    }
+                }
+                return (
+                    <div className="relative container mx-auto px-6 flex flex-col space-y-8"><div className="absolute w-1 bg-slate-200 h-full shadow-md left-1/2 transform -translate-x-1/2"></div>
+                        {timelineData.map((item, index) => (
+                            <div key={item.id} className="relative z-10"><div className={`flex items-center ${index % 2 === 0 ? 'flex-row-reverse' : ''}`}>
+                                    <div className={`w-1/2 ${index % 2 === 0 ? 'pl-8' : 'pr-8'}`}><div className="bg-white p-6 rounded-lg shadow-lg border border-slate-100 transform transition-transform duration-500 hover:scale-105 hover:shadow-xl"><div className="flex items-center mb-2">{getIcon(item.category)}<span className="text-sm font-semibold text-amber-700 uppercase">{item.category}</span></div>
+                                    <h3 className="text-2xl font-serif text-slate-800 flex items-center">
+                                        {item.title}
+                                        {item.lifespan && !item.lifespan.startsWith('n.') && <DeceasedIcon />}
+                                    </h3>
+                                    <p className="text-md font-semibold text-slate-500 mb-3">{item.subtitle}</p><p className="text-slate-600 text-sm leading-relaxed mb-4">{item.description}</p><button onClick={() => onItemSelected(item)} className="font-bold text-sm text-red-800 hover:text-red-600 transition-colors duration-300">Ler mais &rarr;</button></div></div>
+                                    <div className="w-1/2 flex justify-center"><div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-8 rounded-full bg-white border-4 border-amber-600 shadow-sm flex items-center justify-center font-bold text-slate-700 text-sm">{item.year}</div></div>
+                                </div></div>
+                        ))}
+                    </div>
+                );
+            };
+            return (
+                <div className="py-20">
+                    <div className="container mx-auto text-center mb-16">
+                        <h2 className="text-4xl font-serif text-slate-900">A Arquitetura das Ideias Duradouras</h2>
+                        <p className="text-lg text-slate-600 mt-2">Uma Linha do Tempo do Pensamento Conservador.</p>
+                    </div>
+                    <Timeline />
+                    <div className="text-center mt-16">
+                        <button 
+                            onClick={() => setCurrentPage('quiz')} 
+                            className="bg-slate-800 text-white font-semibold px-6 py-3 rounded-md hover:bg-slate-700 transition-colors flex items-center mx-auto"
+                        >
+                            Testar Conhecimentos no Quiz <span className="ml-2">&rarr;</span>
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const QuizPage = ({ setCurrentPage }) => {
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [score, setScore] = useState(0);
+            const [showScore, setShowScore] = useState(false);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [showExplanation, setShowExplanation] = useState(false);
+            const [copied, setCopied] = useState(false);
+
+            const handleAnswerClick = (isCorrect) => {
+                setSelectedAnswer(isCorrect);
+                setShowExplanation(true);
+                if (isCorrect) {
+                    setScore(score + 1);
+                }
+
+                setTimeout(() => {
+                    const nextQuestion = currentQuestion + 1;
+                    if (nextQuestion < quizQuestions.length) {
+                        setCurrentQuestion(nextQuestion);
+                    } else {
+                        setShowScore(true);
+                    }
+                    setSelectedAnswer(null);
+                    setShowExplanation(false);
+                }, 2500); // Increased time to allow reading the explanation
+            };
+
+            const restartQuiz = () => {
+                setCurrentQuestion(0);
+                setScore(0);
+                setShowScore(false);
+                setSelectedAnswer(null);
+                setShowExplanation(false);
+            };
+
+            const handleShare = () => {
+                const resultText = `Eu acertei ${score} de ${quizQuestions.length} no Quiz do Pensamento Conservador! Teste os seus conhecimentos também.`;
+                // Using document.execCommand for broader compatibility within iframes
+                const textArea = document.createElement("textarea");
+                textArea.value = resultText;
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000); // Hide message after 2 seconds
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                }
+                document.body.removeChild(textArea);
+            };
+
+            const getResultProfile = () => {
+                const percentage = (score / quizQuestions.length) * 100;
+                if (percentage >= 80) return { title: "Pensador Experiente", description: "Você demonstra um excelente conhecimento dos princípios conservadores. Continue a aprofundar os seus estudos!" };
+                if (percentage >= 50) return { title: "Explorador Curioso", description: "Você tem uma boa base sobre o pensamento conservador. Explore as outras secções do site para fortalecer ainda mais o seu conhecimento." };
+                return { title: "Iniciante Interessado", description: "Você está no começo da sua jornada. O nosso site é o lugar perfeito para aprender mais sobre os pilares do conservadorismo." };
+            };
+
+            return (
+                <div className="py-20">
+                    <div className="container mx-auto text-center mb-16">
+                        <h2 className="text-4xl font-serif text-slate-900">Quiz Interativo</h2>
+                        <p className="text-lg text-slate-600 mt-2">Teste os seus conhecimentos sobre os princípios conservadores.</p>
+                    </div>
+                    <div className="container mx-auto max-w-2xl bg-white rounded-lg shadow-xl p-8">
+                        {showScore ? (
+                            <div className="text-center">
+                                <h3 className="text-2xl font-bold text-slate-800">Quiz Finalizado!</h3>
+                                <p className="text-lg mt-4">Você acertou {score} de {quizQuestions.length} perguntas.</p>
+                                <div className="mt-6 p-6 bg-blue-50 rounded-lg">
+                                    <h4 className="text-xl font-serif text-blue-800">{getResultProfile().title}</h4>
+                                    <p className="text-slate-700 mt-2">{getResultProfile().description}</p>
+                                </div>
+                                <div className="mt-8 flex flex-wrap justify-center items-center gap-4">
+                                    <button onClick={restartQuiz} className="flex items-center justify-center bg-slate-800 text-white font-semibold px-6 py-3 rounded-md hover:bg-slate-700 transition-colors">
+                                        <RestartIcon /> Refazer Quiz
+                                    </button>
+                                    <button onClick={handleShare} className="flex items-center justify-center bg-white border border-slate-300 text-slate-700 font-semibold px-6 py-3 rounded-md hover:bg-slate-100 transition-colors">
+                                        <ShareIcon /> {copied ? 'Copiado!' : 'Compartilhar Resultado'}
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <div className="mb-6">
+                                    <h3 className="text-2xl font-serif text-slate-800">Pergunta {currentQuestion + 1}/{quizQuestions.length}</h3>
+                                    <p className="text-lg mt-2 text-slate-700">{quizQuestions[currentQuestion].question}</p>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {quizQuestions[currentQuestion].answers.map((answer, index) => {
+                                        let buttonClass = 'bg-slate-100 hover:bg-slate-200 text-slate-800';
+                                        if (selectedAnswer !== null) {
+                                            if (answer.isCorrect) {
+                                                buttonClass = 'bg-green-500 text-white';
+                                            } else if (selectedAnswer === answer.isCorrect) {
+                                                 buttonClass = 'bg-red-500 text-white';
+                                            } else {
+                                                buttonClass = 'bg-slate-100 text-slate-800 opacity-50';
+                                            }
+                                        }
+
+                                        return (
+                                            <button 
+                                                key={index} 
+                                                onClick={() => handleAnswerClick(answer.isCorrect)}
+                                                disabled={selectedAnswer !== null}
+                                                className={`w-full p-4 rounded-lg font-semibold transition-all duration-300 ${buttonClass}`}
+                                            >
+                                                {answer.text}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                {showExplanation && (
+                                    <div className="mt-6 p-4 bg-blue-50 border-l-4 border-blue-300">
+                                        <p className="font-bold text-blue-800">Explicação:</p>
+                                        <p className="text-slate-700 mt-1">{quizQuestions[currentQuestion].explanation}</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    {showScore && (
+                        <div className="text-center mt-16">
+                            <button 
+                                onClick={() => setCurrentPage('artigos')} 
+                                className="bg-slate-800 text-white font-semibold px-6 py-3 rounded-md hover:bg-slate-700 transition-colors flex items-center mx-auto"
+                            >
+                                Avançar para Artigos <span className="ml-2">&rarr;</span>
+                            </button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const ArticlesPage = ({ onArticleSelected, setCurrentPage }) => {
+            const [filter, setFilter] = useState('Todos');
+            const categories = ['Todos', ...new Set(articlesData.map(a => a.category))];
+            const filteredArticles = filter === 'Todos' ? articlesData : articlesData.filter(a => a.category === filter);
+
+            const getCategoryStyle = (category) => {
+                switch(category) {
+                    case 'Gigantes do Pensamento': return { icon: <AuthorIcon />, color: 'bg-blue-100 text-blue-800' };
+                    case 'Análise de Obras': return { icon: <BookIcon />, color: 'bg-amber-100 text-amber-800' };
+                    case 'Conservadorismo no Brasil': return { icon: <BrazilIcon />, color: 'bg-green-100 text-green-800' };
+                    case 'Conceitos-Chave': return { icon: <LightbulbIcon />, color: 'bg-yellow-100 text-yellow-800' };
+                    case 'Estudos de Caso': return { icon: <CaseIcon />, color: 'bg-slate-200 text-slate-800' };
+                    case 'Política e Sociedade': return { icon: <PolicyIcon />, color: 'bg-indigo-100 text-indigo-800' };
+                    default: return { icon: <ArticleIcon />, color: 'bg-gray-100 text-gray-800' };
+                }
+            };
+
+            return (
+                <div className="py-20">
+                    <div className="container mx-auto text-center mb-12">
+                        <h2 className="text-4xl font-serif text-slate-900">Artigos e Análises</h2>
+                        <p className="text-lg text-slate-600 mt-2">Aprofunde o seu conhecimento com as nossas pílulas de sabedoria.</p>
+                    </div>
+                    <div className="container mx-auto px-6 mb-12 flex justify-center gap-2 flex-wrap">
+                        {categories.map(category => (
+                            <button 
+                                key={category}
+                                onClick={() => setFilter(category)}
+                                className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${filter === category ? 'bg-slate-800 text-white' : 'bg-white text-slate-600 hover:bg-slate-200'}`}
+                            >
+                                {category}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="container mx-auto px-6 grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {filteredArticles.map(article => {
+                            const { icon, color } = getCategoryStyle(article.category);
+                            return (
+                                <div key={article.id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col cursor-pointer transform hover:-translate-y-2 transition-transform duration-300" onClick={() => onArticleSelected(article)}>
+                                    <div className="p-6 flex-grow">
+                                        <div className="flex items-center mb-4">
+                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${color} flex-shrink-0`}>
+                                                {icon}
+                                            </div>
+                                            <div className="ml-4">
+                                                <p className="text-sm font-semibold text-red-800 uppercase">{article.category}</p>
+                                                <p className="text-xs text-slate-500">{article.readTime}</p>
+                                            </div>
+                                        </div>
+                                        <h3 className="text-xl font-serif text-slate-800 mt-2">{article.title}</h3>
+                                        <p className="text-slate-500 italic mt-3 text-sm flex-grow">"{article.quote}"</p>
+                                    </div>
+                                    <div className="p-6 border-t border-slate-100">
+                                        <div className="flex flex-wrap gap-2">
+                                            {article.tags.map(tag => (
+                                                <span key={tag} className="bg-slate-100 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-full">{tag}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div className="text-center mt-16">
+                        <button 
+                            onClick={() => setCurrentPage('autores')} 
+                            className="bg-slate-800 text-white font-semibold px-6 py-3 rounded-md hover:bg-slate-700 transition-colors flex items-center mx-auto"
+                        >
+                            Conhecer os Autores <span className="ml-2">&rarr;</span>
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+        
+        const AuthorCard = ({ author }) => {
+            const [isHovered, setIsHovered] = useState(false);
+            const tiltRef = useRef(null);
+
+            useEffect(() => {
+                const tiltNode = tiltRef.current;
+                if (tiltNode) {
+                    VanillaTilt.init(tiltNode, {
+                        max: 5,
+                        speed: 300,
+                        glare: true,
+                        "max-glare": 0.1,
+                        perspective: 1000,
+                    });
+                }
+                // Cleanup function to destroy tilt instance when component unmounts
+                return () => {
+                    if (tiltNode && tiltNode.vanillaTilt) {
+                        tiltNode.vanillaTilt.destroy();
+                    }
+                };
+            }, []);
+
+            return (
+                <div 
+                    ref={tiltRef}
+                    className="bg-white rounded-lg shadow-lg border border-slate-100 flex flex-col transition-all duration-300 transform hover:shadow-2xl overflow-hidden"
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                    style={{ transformStyle: 'preserve-3d', transform: 'perspective(1000px)' }}
+                >
+                    <div className="p-6 bg-slate-800 text-white" style={{ transform: 'translateZ(20px)' }}>
+                         <h3 className="text-2xl font-serif">{author.name}</h3>
+                         <p className="text-sm text-slate-300 font-medium">{author.lifespan}</p>
+                    </div>
+                    <div className="p-6 flex flex-col flex-grow" style={{ transform: 'translateZ(10px)' }}>
+                        <blockquote className="border-l-4 border-slate-300 pl-4 italic text-slate-600 mb-6">
+                            "{author.quote}"
+                        </blockquote>
+                        <p className="text-slate-700 text-sm leading-relaxed flex-grow">{author.summary}</p>
+                        
+                        <div className={`works-section ${isHovered ? 'visible' : ''}`}>
+                            {author.works && author.works.length > 0 && (
+                                <div className="mt-6 pt-4 border-t border-slate-200">
+                                    <h4 className="font-bold text-sm text-slate-800 mb-3 flex items-center"><BookListIcon /> Principais Obras</h4>
+                                    <ul className="space-y-2">
+                                        {author.works.map(work => (
+                                            <li key={work.title} className="text-xs text-slate-600">
+                                                <span className="font-semibold">{work.title}</span> ({work.year})
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const AuthorsPage = ({ onGoHome }) => {
+             return (
+                <div className="py-20">
+                    <div className="container mx-auto text-center mb-16">
+                        <h2 className="text-4xl font-serif text-slate-900">Grandes Pensadores Conservadores</h2>
+                        <p className="text-lg text-slate-600 mt-2 max-w-3xl mx-auto">Explore as mentes que moldaram e definiram o pensamento conservador ao longo da história, desde os seus fundadores até aos seus mais influentes expoentes contemporâneos.</p>
+                    </div>
+                    <div className="container mx-auto px-6 grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                        {authorsData.map((author) => (
+                           <AuthorCard key={author.id} author={author} />
+                        ))}
+                    </div>
+                    <div className="text-center mt-16">
+                        <button 
+                            onClick={onGoHome} 
+                            className="bg-slate-800 text-white font-semibold px-6 py-3 rounded-md hover:bg-slate-700 transition-colors flex items-center mx-auto"
+                        >
+                            Voltar ao Início
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+      const ArticleDetailPage = ({ article, onBack }) => {
+    // Objeto com os textos de aprofundamento para cada artigo
+    const deepDiveTexts = {
+        1: `<strong>Pontos Principais:</strong><ul><li class='ml-4 my-1'>&bull; *Conservadorismo como Disposição:* Oakeshott via o conservadorismo não como uma ideologia, mas como uma disposição para preferir o familiar, o testado e o presente.</li><li class='ml-4 my-1'>&bull; *Crítica ao Racionalismo:* Ele criticava a crença de que a razão pode projetar uma sociedade perfeita do zero, ignorando a sabedoria prática e as tradições.</li><li class='ml-4 my-1'>&bull; *Política como Conversa:* Para Oakeshott, a política deveria ser uma conversa contínua para manter a estabilidade, não uma guerra ideológica.</li></ul><strong class='block mt-3'>Para Continuar a Explorar:</strong><ul><li class='ml-4 my-1'>&bull; *Edmund Burke:* Explore suas "Reflexões sobre a Revolução na França".</li><li class='ml-4 my-1'>&bull; *Russell Kirk:* Leia sobre seus "Seis Cânones do Conservadorismo".</li></ul>`,
+        2: `<strong>Pontos Principais:</strong><ul><li class='ml-4 my-1'>&bull; *Ameaça à Liberdade:* Hayek argumenta que o planejamento central da economia, por mais bem-intencionado, leva inevitavelmente à tirania e à perda da liberdade individual.</li><li class='ml-4 my-1'>&bull; *Superioridade do Mercado:* O sistema de preços no livre mercado é um mecanismo de informação muito superior a qualquer comitê de planejamento central.</li><li class='ml-4 my-1'>&bull; *Liberdades Interligadas:* A liberdade econômica e a liberdade política são inseparáveis; a perda de uma leva à perda da outra.</li></ul><strong class='block mt-3'>Para Continuar a Explorar:</strong><ul><li class='ml-4 my-1'>&bull; *Ludwig von Mises:* Investigue seus trabalhos sobre o cálculo econômico sob o socialismo.</li><li class='ml-4 my-1'>&bull; *Milton Friedman:* Assista à série "Free to Choose" para ver a defesa do livre mercado de forma acessível.</li></ul>`,
+        3: `<strong>Pontos Principais:</strong><ul><li class='ml-4 my-1'>&bull; *Crítica ao Estatismo:* Roberto Campos foi o principal crítico do modelo de desenvolvimento nacionalista e estatizante do Brasil, argumentando que ele gerava ineficiência, corrupção e atraso.</li><li class='ml-4 my-1'>&bull; *Defesa do Liberalismo:* Ele defendia apaixonadamente a abertura comercial, a privatização de empresas estatais e a responsabilidade fiscal como os únicos caminhos para a modernização e prosperidade do país.</li><li class='ml-4 my-1'>&bull; *Realismo Cético:* Campos era conhecido por sua ironia e realismo, desconfiando de ideologias e utopias e focando em soluções pragmáticas baseadas na liberdade econômica.</li></ul><strong class='block mt-3'>Para Continuar a Explorar:</strong><ul><li class='ml-4 my-1'>&bull; *Escola Austríaca de Economia:* Estude os autores que influenciaram Campos, como Hayek e Mises.</li><li class='ml-4 my-1'>&bull; *História Econômica do Brasil:* Pesquise os planos de estabilização econômica dos quais Campos participou e suas consequências.</li></ul>`,
+        4: `<strong>Pontos Principais:</strong><ul><li class='ml-4 my-1'>&bull; *Princípio da Menor Autoridade:* A subsidiariedade dita que os problemas devem ser resolvidos pela menor e mais local autoridade capaz de fazê-lo, fortalecendo a autonomia dos grupos sociais.</li><li class='ml-4 my-1'>&bull; *Valor das Comunidades Intermediárias:* Este princípio valoriza o papel da família, da igreja e das associações voluntárias como essenciais para um tecido social saudável, agindo onde o Estado não deveria.</li><li class='ml-4 my-1'>&bull; *Função de Suporte do Estado:* O Estado não deve substituir a sociedade civil, mas ajudá-la (do latim 'subsídium'), intervindo apenas quando os níveis inferiores não conseguem resolver uma questão.</li></ul><strong class='block mt-3'>Para Continuar a Explorar:</strong><ul><li class='ml-4 my-1'>&bull; *Doutrina Social da Igreja:* Investigue as encíclicas papais, como a 'Rerum Novarum' e a 'Quadragesimo Anno', onde o princípio foi formalizado.</li><li class='ml-4 my-1'>&bull; *Federalismo:* Compare o princípio da subsidiariedade com os conceitos de federalismo e governos locais.</li></ul>`,
+        5: `<strong>Pontos Principais:</strong><ul><li class='ml-4 my-1'>&bull; *Falha da Engenharia Social:* A queda do Muro de Berlim simbolizou o fracasso do maior experimento de engenharia social do século XX, o comunismo, que tentou redesenhar a sociedade e a natureza humana à força.</li><li class='ml-4 my-1'>&bull; *Afirmação dos Valores Tradicionais:* O evento demonstrou a resiliência de valores que o comunismo tentou suprimir: identidade nacional, religião, família e o desejo de liberdade.</li><li class='ml-4 my-1'>&bull; **Validação da Prudência:* A catástrofe do comunismo serviu como uma validação histórica do princípio conservador da prudência, que alerta contra a demolição de ordens sociais existentes em nome de utopias abstratas.</li></ul><strong class='block mt-3'>Para Continuar a Explorar:</strong><ul><li class='ml-4 my-1'>&bull; *Aleksandr Solzhenitsyn:* Leia 'O Arquipélago Gulag' para uma compreensão profunda da realidade do totalitarismo soviético.</li><li class='ml-4 my-1'>&bull; *A Guerra Fria:* Estude o confronto ideológico entre o Ocidente liberal e o bloco comunista.</li></ul>`,
+        6: `<strong>Pontos Principais:</strong><ul><li class='ml-4 my-1'>&bull; *Foco nas Consequências, não nas Intenções:* Sowell insiste que as políticas públicas devem ser julgadas por seus resultados empíricos, não por suas nobres intenções, que muitas vezes levam a consequências desastrosas e não previstas.</li><li class='ml-4 my-1'>&bull; *Crítica às Ações Afirmativas:* Com base em dados de vários países, ele argumenta que políticas de cotas raramente ajudam os mais necessitados e acabam por estigmatizar os grupos que pretendem ajudar.</li><li class='ml-4 my-1'>&bull; *Complexidade das Disparidades:* Sowell desafia a narrativa de que as desigualdades estatísticas entre grupos são prova de discriminação, apontando para uma vasta gama de fatores culturais, geográficos e históricos que influenciam os resultados.</li></ul><strong class='block mt-3'>Para Continuar a Explorar:</strong><ul><li class='ml-4 my-1'>&bull; *"Conflito de Visões":* Leia sua obra fundamental para entender a base filosófica das divergências políticas.</li><li class='ml-4 my-1'>&bull; *Economia Básica:* Explore seu livro 'Economia Básica' para uma introdução lúcida aos princípios econômicos.</li></ul>`
+    };
+    
+    return (
+        <div className="py-20">
+            <div className="container mx-auto max-w-3xl px-6">
+                <button onClick={onBack} className="font-bold text-sm text-red-800 hover:text-red-600 transition-colors duration-300 mb-8">
+                    &larr; Voltar à lista de artigos
+                </button>
+                <p className="text-sm font-semibold text-red-800 uppercase">{article.category}</p>
+                <h1 className="text-4xl md:text-5xl font-serif text-slate-900 mt-2 mb-4">{article.title}</h1>
+                <p className="text-slate-500 mb-8">{article.readTime}</p>
+                
+                <div className="prose max-w-none text-slate-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: article.content }} />
+                
+                <div className="pt-8 mt-8 border-t border-slate-200">
+                    <h4 className="font-bold text-slate-800 mb-2 flex items-center">
+                        <SparkleIcon /> Análise e Pontos-Chave
+                    </h4>
+                    {/* ===== MUDANÇA AQUI ===== */}
+                    <div className="p-4 bg-blue-50/50 border-l-4 border-blue-300 text-slate-800 text-justify">
+                        <div dangerouslySetInnerHTML={{ __html: deepDiveTexts[article.id] || "Análise não disponível." }} />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+        const PlaceholderPage = ({ title }) => (<div className="flex items-center justify-center py-32"><div className="text-center"><h2 className="text-4xl font-serif text-slate-900">{title}</h2><p className="text-lg text-slate-600 mt-2">Esta seção será implementada em breve.</p></div></div>);
+
+      const PrincipleModal = ({ principle, onClose }) => {
+    if (!principle) return null;
+    
+    // Objeto com os textos de aprofundamento para cada princípio
+    const deepDiveTexts = {
+        1: 'A crença em uma ordem moral transcendente é o alicerce do pensamento conservador. Este princípio, defendido por pensadores desde Cícero até Russell Kirk, sustenta que a conduta humana deve ser guiada por verdades morais universais e objetivas, e não apenas por leis ou conveniências. Essa ordem não é uma invenção humana, mas uma realidade descoberta através da tradição, da razão e da fé. Ela fornece a base para a justiça, a virtude e a coesão social, argumentando que uma sociedade que ignora essa bússola moral está fadada ao declínio e à tirania.',
+        2: 'A Tradição, para o conservador, é a "democracia dos mortos", como definiu G.K. Chesterton. Ela representa a sabedoria acumulada de inúmeras gerações, testada pela experiência e refinada pelo tempo. Não se trata de uma oposição cega ao progresso, mas de um ceticismo saudável em relação a inovações radicais que descartam o conhecimento herdado. Edmund Burke argumentava que as instituições, costumes e preconceitos de uma nação formam um ecossistema complexo que não deve ser demolido por capricho ideológico. A tradição é o alicerce sobre o qual reformas prudentes podem ser construídas.',
+        3: "A prudência, no pensamento conservador, é a virtude cardeal da política. Inspirada em Edmund Burke, ela se manifesta como uma profunda cautela em relação a mudanças radicais e projetos de engenharia social. O pensador prudente não rejeita a reforma, mas insiste que ela deve ser gradual, orgânica e baseada na experiência acumulada das gerações, em vez de em teorias abstratas. Trata-se de reconhecer a complexidade da sociedade e a natureza imperfeita do ser humano, preferindo sempre o 'mal conhecido ao bem não experimentado'. A prudência é, portanto, a responsabilidade de preservar a continuidade e a estabilidade social, corrigindo suas falhas sem destruir seus alicerces.",
+        4: 'O conservadorismo celebra a variedade natural da vida humana, opondo-se a esquemas de igualitarismo radical que buscam nivelar a sociedade. Russell Kirk afirmava que uma sociedade justa não é aquela que impõe uma igualdade de resultados, mas a que permite uma diversidade de talentos, fortunas e classes sociais, unidas por laços de lealdade e dever. Essa variedade se manifesta em instituições, costumes locais e hierarquias orgânicas. Tentar erradicar essa diversidade em nome de uma igualdade abstrata é visto como um ato de tirania que empobrece a vida social e destrói a liberdade.',
+        5: 'Central para o pensamento conservador é a visão "restrita" da natureza humana, como a descreveu Thomas Sowell. Este princípio reconhece que o ser humano é inerentemente imperfeito, limitado em conhecimento e propenso a paixões e egoísmo. Por essa razão, os conservadores desconfiam de utopias e projetos que visam criar um "paraíso na Terra", pois acreditam que tais ambições ignoram os limites da natureza humana e inevitavelmente levam à concentração de poder e à tirania. Instituições como o estado de direito, a propriedade e a moralidade tradicional são vistas como barreiras necessárias para conter os piores impulsos da humanidade.',
+        6: 'Seguindo a tradição de John Locke, os conservadores veem a liberdade e a propriedade privada como inseparáveis. A propriedade não é apenas um meio de acumulação de riqueza, mas o principal baluarte da liberdade individual contra a tirania do Estado. Ter o direito de possuir, usar e dispor de bens cria uma esfera de autonomia onde o indivídu-o pode prosperar sem a permissão do poder político. Para Edmund Burke, a capacidade de transmitir propriedade através das gerações era essencial para a continuidade e estabilidade da sociedade.',
+        7: 'O princípio da subsidiariedade, valorizado pelo conservadorismo, afirma que as decisões devem ser tomadas no nível mais local e descentralizado possível. Acredita-se que as "pequenas pelotarias" de Edmund Burke — a família, a vizinhança, a igreja, as associações voluntárias — são as verdadeiras escolas da virtude e os principais agentes na resolução de problemas sociais. Um governo central forte que usurpa as funções dessas comunidades locais enfraquece o tecido social, mina a responsabilidade individual e cria uma população de dependentes passivos.',
+        8: 'Dada a visão da natureza humana como imperfeita e potencialmente corruptível, os conservadores defendem veementemente a limitação do poder governamental. Isso é alcançado através de constituições escritas, da separação de poderes (Executivo, Legislativo e Judiciário) e de um sistema de freios e contrapesos. O objetivo é evitar a concentração de poder em qualquer indivíduo ou grupo, pois o poder ilimitado é visto como a maior ameaça à liberdade. Um governo forte em suas funções legítimas (como defesa e justiça) deve ser estritamente limitado em seu escopo.',
+        9: 'A prescrição, um conceito articulado por Edmund Burke, confere legitimidade a instituições e práticas que existem há muito tempo. A ideia é que se um costume ou direito sobreviveu ao teste de muitas gerações, ele provavelmente possui uma sabedoria e uma utilidade que não são imediatamente aparentes para o reformador radical. Direitos prescritivos, como o direito à propriedade herdada, ganham sua força não de uma teoria abstrata, mas do fato de terem sido longamente estabelecidos e aceitos, formando a base da ordem social.',
+        10: 'O conservadorismo não busca a estagnação, mas sim um equilíbrio harmonioso entre permanência e mudança. O estadista conservador, na visão de Burke, deve possuir tanto a capacidade de preservar as instituições valiosas quanto a habilidade de reformar o que se tornou corrupto ou ineficaz. A sociedade é vista como um organismo vivo que precisa mudar para se conservar, mas essa mudança deve ser gradual e respeitosa com a sua estrutura fundamental, como a reforma de um edifício histórico, e não a sua demolição para construir algo totalmente novo.',
+        11: 'Embora nem todos os conservadores sejam liberais clássicos, a maioria defende o livre mercado como o sistema econômico mais compatível com a liberdade individual e a prosperidade. Inspirados por Adam Smith, eles acreditam que a competição, o sistema de preços e as trocas voluntárias coordenam a atividade econômica de forma mais eficiente e moral do que o planejamento central. O mercado livre é visto não apenas como um motor de inovação, mas também como uma esfera de responsabilidade pessoal e cooperação social que limita a necessidade de intervenção estatal coercitiva.'
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4" onClick={onClose}>
+            <div className="bg-stone-50 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center p-6 border-b">
+                    <h2 className="text-3xl font-serif text-slate-900">{principle.title}</h2>
+                    <button onClick={onClose} className="text-slate-500 hover:text-slate-900 text-3xl font-bold">&times;</button>
+                </div>
+                <div className="p-6 space-y-6 text-slate-700 overflow-y-auto">
+                    <div>
+                        <p className="font-semibold text-slate-800">Trocando em miúdos:</p>
+                        <p className="italic">"{principle.analogy}"</p>
+                    </div>
+                    <div className="p-4 bg-red-50/50 border-l-4 border-red-300">
+                        <p className="font-semibold text-red-800">Mito:</p>
+                        <p className="italic mb-2">{principle.myth}</p>
+                        <p className="font-semibold text-green-800">Verdade:</p>
+                        <p>{principle.truth}</p>
+                    </div>
+                    <div className="pt-6 border-t border-slate-200">
+                        <h4 className="font-bold text-slate-800 mb-2 flex items-center">
+                            <SparkleIcon /> Aprofundando o Conceito
+                        </h4>
+                        <div className="p-4 bg-blue-50/50 border-l-4 border-blue-300 text-slate-800">
+                            <p className="text-justify leading-relaxed">{deepDiveTexts[principle.id] || "Texto de aprofundamento não disponível."}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+      const TimelineModal = ({ item, onClose }) => {
+    // Objeto com os textos de aprofundamento para cada item da timeline
+    const deepDiveTexts = {
+        1: "Edmund Burke é considerado o pai do conservadorismo moderno. Sua principal contribuição foi a crítica à Revolução Francesa, onde argumentou que a sociedade é um contrato complexo entre as gerações passadas, presentes e futuras, e que as tradições e instituições existentes (como a família, a igreja e o Estado) são repositórios de uma sabedoria testada pelo tempo. Ele defendia reformas graduais e orgânicas em oposição a mudanças revolucionárias baseadas em ideais abstratos, que ele acreditava levarem à tirania e ao caos.<br><br><strong>Principais Obras:</strong><ul><li class='ml-4 my-1'>&bull; Reflexões sobre a Revolução na França (1790)</li><li class='ml-4 my-1'>&bull; Uma Investigação Filosófica sobre a Origem de Nossas Ideias do Sublime e do Belo (1757)</li></ul>",
+        2: "Friedrich Hayek foi um dos maiores defensores do liberalismo clássico no século XX. Ele argumentava que as economias de mercado são sistemas complexos e espontâneos cujo conhecimento está disperso entre milhões de pessoas, tornando impossível o planejamento central eficaz. Para Hayek, as tentativas de controlar a economia levam a uma perda gradual de liberdade, um processo que ele famosamente chamou de 'O Caminho da Servidão'. Sua defesa do estado de direito e da liberdade individual influenciou profundamente o conservadorismo liberal.<br><br><strong>Principais Obras:</strong><ul><li class='ml-4 my-1'>&bull; O Caminho da Servidão (1944)</li><li class='ml-4 my-1'>&bull; A Constituição da Liberdade (1960)</li></ul>",
+        3: "Russell Kirk foi a figura central na revitalização do conservadorismo tradicionalista nos Estados Unidos do pós-guerra. Em 'A Mentalidade Conservadora', ele não definiu o conservadorismo como uma ideologia, mas como um corpo de sentimentos e preceitos herdados. Seus famosos 'Seis Cânones' — incluindo a crença em uma ordem moral transcendente, o respeito pela tradição e a prudência nas reformas — forneceram uma base intelectual coesa para o movimento, distinguindo-o do liberalismo clássico e do libertarianismo ao enfatizar a comunidade, a ordem e a religião.<br><br><strong>Principais Obras:</strong><ul><li class='ml-4 my-1'>&bull; A Mentalidade Conservadora (1953)</li><li class='ml-4 my-1'>&bull; A Política da Prudência (1993)</li></ul>",
+        4: "Michael Oakeshott ofereceu uma das mais sofisticadas defesas filosóficas do conservadorismo, descrevendo-o não como um credo, mas como uma 'disposição'. Ser conservador, para ele, é preferir o familiar ao desconhecido e o experimentado ao não tentado. Sua principal crítica era ao 'racionalismo na política' — a perigosa crença de que a razão humana pode projetar sociedades perfeitas a partir de teorias abstratas, ignorando a sabedoria prática e tácita contida nas tradições. A política, para Oakeshott, deveria ser uma atividade prudente de manter a ordem social, não um projeto de transformação utópica.<br><br><strong>Principais Obras:</strong><ul><li class='ml-4 my-1'>&bull; Racionalismo na Política e Outros Ensaios (1962)</li><li class='ml-4 my-1'>&bull; Sobre a Conduta Humana (1975)</li></ul>",
+        5: "Sir Roger Scruton foi o mais importante filósofo conservador do final do século XX e início do século XXI. Ele argumentava que o conservadorismo não é sobre economia, mas sobre a preservação do 'lar' (oikos) — a cultura, as tradições, a lei e as instituições que formam a identidade de uma nação e permitem a vida em comunidade. Scruton combateu vigorosamente o que via como as forças destrutivas do modernismo e do pensamento de esquerda, defendendo a importância da alta cultura, da beleza estética e dos laços de pertencimento como essenciais para uma vida humana plena.<br><br><strong>Principais Obras:</strong><ul><li class='ml-4 my-1'>&bull; O Significado do Conservadorismo (1980)</li><li class='ml-4 my-1'>&bull; Como ser um Conservador (2014)</li></ul>",
+        6: "Thomas Sowell é um dos mais brilhantes e prolíficos intelectuais públicos dos tempos modernos. Embora se identifique mais como libertário, sua abordagem empírica e seu ceticismo em relação à engenharia social o alinham com o pensamento conservador. Em 'Conflito de Visões', ele argumenta que os debates políticos derivam de duas visões opostas da natureza humana: a 'restrita' (que a vê como imperfeita e imutável, a base do conservadorismo) e a 'irrestrita' (que a vê como perfectível, a base do progressismo). Sua obra é uma defesa rigorosa da realidade e das consequências não intencionais contra as utopias bem-intencionadas.<br><br><strong>Principais Obras:</strong><ul><li class='ml-4 my-1'>&bull; Conflito de Visões (1987)</li><li class='ml-4 my-1'>&bull; Os Intelectuais e a Sociedade (2009)</li></ul>",
+        7: "Olavo de Carvalho foi uma figura central e altamente controversa no ressurgimento do conservadorismo no Brasil no século XXI. Sua obra se concentrou na filosofia, na crítica cultural e no que ele chamava de 'guerra cultural', argumentando que a esquerda havia alcançado uma hegemonia nos meios intelectuais e culturais que precisava ser combatida. Através de seus livros, cursos e presença online, ele introduziu uma geração de brasileiros a um vocabulário conservador e a uma crítica radical do status quo político e intelectual, exercendo uma influência inegável no debate público do país.<br><br><strong>Principais Obras:</strong><ul><li class='ml-4 my-1'>&bull; O Imbecil Coletivo (1996)</li><li class='ml-4 my-1'>&bull; O Jardim das Aflições (1995)</li></ul>"
+    };
+
+    if (!item) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4" onClick={onClose}>
+            <div className="bg-stone-50 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-start p-6 border-b">
+                    <div>
+                        <h2 className="text-3xl font-serif text-slate-900">{item.title}</h2>
+                        {item.lifespan && <p className="text-md text-slate-500 font-semibold">{item.lifespan}</p>}
+                    </div>
+                    <button onClick={onClose} className="text-slate-500 hover:text-slate-900 text-3xl font-bold">&times;</button>
+                </div>
+                <div className="p-6 space-y-4 text-slate-700 overflow-y-auto">
+                    <p className="text-lg text-amber-700 font-semibold">{item.subtitle}</p>
+                    <p className="leading-relaxed">{item.description}</p>
+                    <div className="mt-4 pt-4 border-t border-slate-200">
+                        <h4 className="font-bold text-slate-800">Contexto Histórico:</h4>
+                        <p className="text-slate-600 mt-1">{item.context}</p>
+                    </div>
+                    <div className="pt-6 border-t border-slate-200">
+                        <h4 className="font-bold text-slate-800 mb-2 flex items-center">
+                            <SparkleIcon /> Aprofundando o Pensamento
+                        </h4>
+                        {/* ===== MUDANÇA AQUI ===== */}
+                        <div className="p-4 bg-blue-50/50 border-l-4 border-blue-300 text-slate-800 text-justify">
+                            <div dangerouslySetInnerHTML={{ __html: deepDiveTexts[item.id] || "Aprofundamento não disponível." }} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+        const Header = ({ currentPage, setCurrentPage, onGoHome }) => {
+            const navItems = [
+                { id: 'conceito', label: 'Conceito', icon: <ConceptIcon /> },
+                { id: 'principios', label: 'Princípios', icon: <PrinciplesIcon /> },
+                { id: 'timeline', label: 'Linha do Tempo', icon: <TimelineIcon /> },
+                { id: 'quiz', label: 'Quiz', icon: <QuizIcon /> },
+                { id: 'artigos', label: 'Artigos', icon: <ArticleIcon /> },
+                { id: 'autores', label: 'Autores', icon: <AuthorIcon /> },
+            ];
+            return (
+                <header className="bg-stone-50/80 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-stone-200">
+                    <nav className="container mx-auto px-6 py-3 flex justify-between items-center">
+                        <button 
+                          onClick={onGoHome} 
+                          className="text-xl font-serif font-bold text-slate-800 text-left hover:text-slate-600 transition-colors cursor-pointer"
+                        >
+                            Pensamento Conservador
+                        </button>
+                        <ul className="flex items-center space-x-2 text-sm font-semibold">
+                            {navItems.map(item => {
+                                const isActive = currentPage === item.id;
+                                const activeClasses = 'bg-slate-800 text-white';
+                                const inactiveClasses = 'text-slate-600 hover:bg-slate-200 hover:text-slate-800';
+                                return (<li key={item.id}><button onClick={() => setCurrentPage(item.id)} className={`px-4 py-2 rounded-md flex items-center transition-colors duration-200 ${isActive ? activeClasses : inactiveClasses}`}>{item.icon} {item.label}</button></li>);
+                            })}
+                        </ul>
+                    </nav>
+                </header>
+            );
+        };
+
+        const Footer = ({ setCurrentPage }) => (
+            <footer className="bg-white border-t border-stone-200">
+                <div className="container mx-auto px-6 py-12">
+                    <div className="grid md:grid-cols-3 gap-8 text-slate-600">
+                        <div><h3 className="font-serif text-lg font-bold text-slate-800 mb-3">Pensamento Conservador</h3><p className="text-sm leading-relaxed">Explorando a tradição, ordem e liberdade através do pensamento que valoriza a sabedoria das gerações passadas.</p></div>
+                        <div><h3 className="font-serif text-lg font-bold text-slate-800 mb-3">Explore</h3><ul className="space-y-2 text-sm">
+                                <li><button onClick={() => setCurrentPage('conceito')} className="hover:text-slate-900 transition-colors">Conceito</button></li>
+                                <li><button onClick={() => setCurrentPage('principios')} className="hover:text-slate-900 transition-colors">Princípios</button></li>
+                                <li><button onClick={() => setCurrentPage('timeline')} className="hover:text-slate-900 transition-colors">Linha do Tempo</button></li>
+                                <li><button onClick={() => setCurrentPage('quiz')} className="hover:text-slate-900 transition-colors">Quiz Interativo</button></li>
+                                <li><button onClick={() => setCurrentPage('artigos')} className="hover:text-slate-900 transition-colors">Artigos</button></li>
+                                <li><button onClick={() => setCurrentPage('autores')} className="hover:text-slate-900 transition-colors">Grandes Pensadores</button></li>
+                            </ul></div>
+                        <div><h3 className="font-serif text-lg font-bold text-slate-800 mb-3">Sobre o Projeto</h3><p className="text-sm leading-relaxed">Este site foi criado com o objetivo de apresentar o pensamento conservador de forma acessível e interativa, promovendo o entendimento de seus princípios e história.</p></div>
+                    </div>
+                </div>
+                <div className="bg-stone-100 border-t border-stone-200"><div className="container mx-auto px-6 py-4 text-sm text-slate-500 flex justify-between items-center"><p>&copy; {new Date().getFullYear()} Pensamento Conservador. Todos os direitos reservados.</p><p>Um projeto dedicado à educação e ao debate de ideias.</p></div></div>
+            </footer>
+        );
+
+
+        // --- COMPONENTE PRINCIPAL DA APLICAÇÃO ---
+        function App() {
+            const [showSplash, setShowSplash] = useState(true);
+            const [currentPage, setCurrentPage] = useState('conceito');
+            const [selectedTimelineItem, setSelectedTimelineItem] = useState(null);
+            const [selectedPrinciple, setSelectedPrinciple] = useState(null);
+            const [selectedArticle, setSelectedArticle] = useState(null);
+
+            const handleStartExploring = () => {
+                setShowSplash(false);
+            };
+            
+            const handleGoHome = () => {
+                setShowSplash(true);
+            };
+
+            const handleSelectTimelineItem = (item) => setSelectedTimelineItem(item);
+            const handleCloseTimelineModal = () => setSelectedTimelineItem(null);
+
+            const handleSelectPrinciple = (principle) => setSelectedPrinciple(principle);
+            const handleClosePrincipleModal = () => setSelectedPrinciple(null);
+
+            const handleSelectArticle = (article) => setSelectedArticle(article);
+            const handleBackToArticles = () => setSelectedArticle(null);
+
+            const renderPage = () => {
+                switch (currentPage) {
+                    case 'conceito': return <ConceptPage setCurrentPage={setCurrentPage} />;
+                    case 'principios': return <PrinciplesPage onPrincipleSelected={handleSelectPrinciple} setCurrentPage={setCurrentPage} />;
+                    case 'timeline': return <TimelinePage onItemSelected={handleSelectTimelineItem} setCurrentPage={setCurrentPage} />;
+                    case 'quiz': return <QuizPage setCurrentPage={setCurrentPage} />;
+                    case 'artigos': 
+                        return selectedArticle ? 
+                            <ArticleDetailPage article={selectedArticle} onBack={handleBackToArticles} /> : 
+                            <ArticlesPage onArticleSelected={handleSelectArticle} setCurrentPage={setCurrentPage} />;
+                    case 'autores': return <AuthorsPage onGoHome={handleGoHome} />;
+                    default: return <ConceptPage setCurrentPage={setCurrentPage} />;
+                }
+            };
+
+            if (showSplash) {
+                return <SplashPage onStart={handleStartExploring} />;
+            }
+
+            return (
+                <div className="bg-stone-50 font-sans text-slate-700 min-h-screen flex flex-col">
+                    <Header currentPage={currentPage} setCurrentPage={setCurrentPage} onGoHome={handleGoHome} />
+                    <main className="flex-grow flex flex-col">
+                        {renderPage()}
+                    </main>
+                    <Footer setCurrentPage={setCurrentPage} />
+                    <TimelineModal item={selectedTimelineItem} onClose={handleCloseTimelineModal} />
+                    <PrincipleModal principle={selectedPrinciple} onClose={handleClosePrincipleModal} />
+                </div>
+            );
+        }
+        
+        // --- Renderização do App ---
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+
+    </script>
+</body>
+</html>
